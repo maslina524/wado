@@ -10,4 +10,8 @@ opt-level = "z"
 lto = true
 codegen-units = 1
 panic = "abort"
-strip = true  
+strip = true
+
+[features]
+default = ["windows_raw_dylib"]
+windows_raw_dylib = []
