@@ -1,3 +1,5 @@
+use crate::types::*;
+
 #[cfg(feature = "windows_raw_dylib")]
 macro_rules! link_raw_dylib {
     ($library:literal $abi:literal $($link_name:literal)? $(#[$doc:meta])? fn $($function:tt)*) => (
@@ -38,3 +40,8 @@ macro_rules! link {
         link_dylib!($($tt)*);
     )
 }
+
+link!("kernel32.dll" "system" fn CloseHandle(hObject: HANDLE) -> BOOL);
+link!("kernel32.dll" "system" fn GetCurrentProcess() -> HANDLE);
+link!("advapi32.dll" "system" fn OpenProcessToken(processHandle: HANDLE, desiredAccess: TOKEN_ACCESS_MASK, tokenHandle: *mut HANDLE) -> BOOL);
+link!("advapi32.dll" "system" fn GetTokenInformation(tokenHandle: HANDLE, tokenInformationClass: TOKEN_INFORMATION_CLASS, tokenInformation: LPVOID, tokenInformationLength: DWORD, returnLength: PDWORD) -> BOOL);
