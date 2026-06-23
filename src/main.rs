@@ -2,7 +2,7 @@
 #![no_main]
 #![allow(non_snake_case, non_upper_case_globals, non_camel_case_types, dead_code, clippy::all)]
 
-use core::{ffi::c_void, mem, ptr::addr_of_mut};
+use core::{ffi::c_void, mem, ptr::{self, addr_of_mut}};
 
 #[cfg(not(test))]
 use core::panic::PanicInfo;
@@ -16,10 +16,13 @@ fn panic(_info: &PanicInfo) -> ! {
 mod consts;
 mod types;
 mod link;
+mod encoding;
 
 use consts::*;
 use types::*;
 use link::*;
+
+use encoding::str_to_utf16;
 
 fn is_elevated() -> bool {
     let mut h_token: HANDLE = NULL;
@@ -47,7 +50,39 @@ fn is_elevated() -> bool {
     return success == 1 && elevation.TokenIsElevated == 1;
 }
 
+fn run_as_admin() -> bool {
+    let mut exe_path = [0u16; MAX_PATH];
+
+    let len = unsafe {
+        GetModuleFileNameW(ptr::null_mut(), exe_path.as_mut_ptr(), MAX_PATH as u32)
+    };
+    if len == 0 {
+        return false;
+    }
+
+    let mut runas = [0u16; 16];
+    let len = str_to_utf16("runas", &mut runas);
+
+    let result = unsafe {
+        ShellExecuteW(
+            ptr::null_mut(),
+            runas[..len].as_ptr(),
+            exe_path.as_ptr(),
+            ptr::null(),
+            ptr::null(),
+            SW_SHOWNORMAL as i32,
+        )
+    };
+
+    result as isize > 32
+}
+
 #[unsafe(no_mangle)]
 pub extern "C" fn main() -> i32 {
-    return if is_elevated() { 1 } else { 0 }
+    let exit_code = if !is_elevated() {
+        if run_as_admin() { 0 } else { 1 }
+    } else {
+        8
+    };
+    unsafe { ExitProcess(exit_code as u32) };
 }
