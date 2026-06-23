@@ -45,3 +45,6 @@ link!("kernel32.dll" "system" fn CloseHandle(hObject: HANDLE) -> BOOL);
 link!("kernel32.dll" "system" fn GetCurrentProcess() -> HANDLE);
 link!("advapi32.dll" "system" fn OpenProcessToken(processHandle: HANDLE, desiredAccess: TOKEN_ACCESS_MASK, tokenHandle: *mut HANDLE) -> BOOL);
 link!("advapi32.dll" "system" fn GetTokenInformation(tokenHandle: HANDLE, tokenInformationClass: TOKEN_INFORMATION_CLASS, tokenInformation: LPVOID, tokenInformationLength: DWORD, returnLength: PDWORD) -> BOOL);
+link!("kernel32.dll" "system" fn GetModuleFileNameW(hModule: HMODULE, lpFileName: PWSTR, nSize: u32) -> u32);
+link!("shell32.dll" "system" fn ShellExecuteW(hwnd: HWND, lpOperation: LPCWSTR, lpFile: LPCWSTR, lpParameters: LPCWSTR, lpDirectory: LPCWSTR, nShowCmd: INT) -> HINSTANCE);
+link!("kernel32.dll" "system" fn ExitProcess(uExitCode: u32) -> !);
